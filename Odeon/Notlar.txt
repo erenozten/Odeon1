@@ -1,0 +1,42 @@
+Proje C# ile Visual Studio kullanılarak geliştirilmiştir.
+
+API, istendiği gibi Class Library şeklinde geliştirilmiştir.
+
+API, istenen sorting ve filtering işlemlerini gerçekleştirmektedir.
+
+API, istendiği gibi http://www.tcmb.gov.tr/kurlar/today.xml adresinden verileri çekmektedir.
+
+API, istenen export işlemlerini (CSV, XML) gerçekleştirmektedir. JSON gibi yeni formatların kolayca entegre edilebileceği bir tasarım oluşturulmuştur.
+
+Unit testlerle kodun doğruluğu ölçülmektedir.
+
+---
+
+Kullanılan tool ve library'ler: Xunit, CsvHelper
+
+Kullanılan teknikler: Strategy Pattern, Extension Methods, Interfaces
+
+Trade-off: Geliştirilme sürecinde pattern, interface, extension method gibi yapıların kullanılması ileriye dönük olarak sağlam bir altyapı sağladı, fakat bu dizayn oluştururken fazla zaman harcandı.
+
+---
+
+TcmbDownloader ismindeki 
+
+Projede CsvExporter, XmlExporter class'ları vardır. Bu class'lar IExporter interface'ini implement etmektedir.
+
+Json return edilmek istendiği takdirde JsonExporter class'ı oluşturulup bu interface'den kalıtım almalıdır.
+
+CsvExporter ve XmlExporter class'ları Export() metotlarına sahiptir, (Export() metodu IExplorer interface'inden implement edilmektedir). Export() metodu içine List<TcmbCurrencyData> listesi almaktadır. Bu metoda argüman olarak API'den dönen veriler C# objelerine dönüştürülüp bir liste oluşturularak verilmektedir.
+
+Api'den dönen verilerin tüm property'leri string olarak alınmaktadır, sonrasında asıl data tiplerine dönüştürülmektedir. Bunu yapmaktaki amaç, kolaylık sağlamaktır. String tipinden asıl data tipine dönüştürürken mapping işlemleri yapılmaktadır. Bunun için AutoMapper kullanılabilirdi fakat fazla zaman olmadığı için kendim bir class oluşturarak map'leme işlemlerini yaptım (CustomMapper.cs).
+
+Filtreleme işlemleri için extension method'lar kullanıldı. Extension method'lar List<TcmbCurrencyData> için yazıldı. Bu liste, yukarıda belirtildiği üzere, API'den gelen data'yı tutmaktadır.
+
+
+
+
+
+
+
+
+
