@@ -1,8 +1,4 @@
-Proje, C# diliyle Visual Studio ortamında geliştirilmiştir.
-
-API, Class Library şeklinde geliştirilmiştir.
-
-API, http://www.tcmb.gov.tr/kurlar/today.xml adresinden verileri çekmektedir.
+API, C# diliyle Visual Studio ortamında, class library şeklinde geliştirilmiştir.
 
 API, sorting, filtering, exporting işlemlerini (CSV, XML) gerçekleştirmektedir. JSON gibi yeni formatların kolayca entegre edilebileceği bir dizayn yapılmıştır.
 
@@ -12,45 +8,33 @@ Unit test yapılmıştır.
 
 Kullanılan tool ve library'ler: Xunit, CsvHelper
 
-Kullanılan teknikler: Strategy Pattern, Extension Method, Interface
+Kullanılan teknikler: Strategy Pattern, Custom Extension Methods, Interfaces
 
 Trade-off: Geliştirilme sürecinde pattern, interface, extension method gibi yapıların kullanılması ileriye dönük olarak sağlam bir altyapı sağladı fakat bu dizayn oluştururken fazla zaman harcandı.
 
-XML exporting, CSV exporting, sorting ve filtering gibi işlemlerin nasıl çalıştırıldığını göstermek adına ConsoleApp1 isminde bir console programı oluşturuldu.
+XML exporting, CSV exporting, sorting ve filtering gibi işlemlerin nasıl çalıştırıldığını göstermek adına ConsoleApp1 isminde bir console programı oluşturulmuştur.
 
 ---
 
 TcmbDownload class'ı içerisindeki DownloadCurrencyDataAsync metodu ile https://www.tcmb.gov.tr/kurlar/today.xml adresine bağlanılmaktadır. Bu metot, adresten gelen mesajı HttpResponseMessage objesi olarak dönmektedir.
 
-TcmbCurrencyDataService class'ındaki GetCurrencyData metodu ile DownloadCurrencyDataAsync() metodu çağrılarak http response'a ulaşılmaktadır. Gelen data'nın c# class'ına dönüştürülme işlemi burada yapılmaktadır. Adresten gelen her bir xml elementi bir c# objesine dönüştürülmekte ve liste olarak tutulmaktadır. Metot, bu listeyi return etmektedir. Dolayısıyla burada oluşturulan liste, sorting, filtering, exporting gibi tüm işlemler için kullanılacaktır.
+TcmbCurrencyDataService class'ındaki GetCurrencyData metodu ile DownloadCurrencyDataAsync() metodu çağrılarak adresten gelen http response'a ulaşılmaktadır. Gelen data'nın c# class'ına dönüştürülme işlemi burada yapılmaktadır. Adresten gelen her bir xml elementi bir c# objesine dönüştürülmekte ve liste olarak tutulmaktadır. Metot, bu listeyi return etmektedir. Dolayısıyla burada oluşturulan liste, sorting, filtering, exporting gibi tüm işlemler için kullanılacaktır. Böylece kod tekrarı yapılmamış olacaktır.
 
-Projede CsvExporter, XmlExporter class'ları bulunmaktadır. Bu class'lar IExporter interface'ini implement etmektedir. IExporter içinde Export() metodu bulunmaktadır.
+Projede CsvExporter, XmlExporter class'ları bulunmaktadır. Bu class'lar IExporter interface'ini implement etmektedir. IExporter içinde Export() metodu bulunmaktadır. Json return edilmek istendiği takdirde JsonExporter class'ı oluşturulup bu interface'in implement edilmesi ve serialization işleminin yapılması gerekmektedir.
 
-Json return edilmek istendiği takdirde JsonExporter class'ı oluşturulup bu interface'den kalıtım alması ve serialization işleminin yapılması gerekmektedir.
-
-CsvExporter ve XmlExporter class'ları Export() metodu içine List<TcmbCurrencyData> listesi almaktadır ve string dönmektedir. Bu metoda argüman olarak API'den dönen veriler C# objelerine dönüştürülüp bir liste oluşturularak verilmektedir.
+CsvExporter ve XmlExporter class'ları, Export() metodu içine List<TcmbCurrencyData> listesi almaktadır ve string dönmektedir. Bu metoda argüman olarak API'den dönen veriler verilmektedir. CsvExporter class'ı, gelen bu data'yı csv formatına çevirmektedir. XmlExporter class'ı ise xml serialization işlemini yapmaktadır.
 
 Api'den dönen verilerin tüm property'leri string olarak alınmaktadır, sonrasında asıl data tiplerine dönüştürülmektedir. Bunu yapmaktaki amaç, kolaylık sağlamış olmaktır. 
 
-String tipinden asıl data tipine dönüştürürken mapping işlemleri yapılmaktadır. Bunun için AutoMapper kullanılabilirdi fakat fazla zaman olmadığı için kendim bir class oluşturarak map'leme işlemlerini yaptım (class adı: CustomMapper.cs).
+Verileri string tipinden asıl data tipine dönüştürürken mapping işlemleri yapılmaktadır. Bunun için AutoMapper kullanılabilirdi fakat zaman olmadığı için CustomMapper isimli bir class içinde bu mapping işlemlerini kendim yaptım.
 
 Filtreleme işlemleri için extension method'lar kullanıldı. Extension method'lar List<TcmbCurrencyData> için yazıldı. Bu liste, yukarıda belirtildiği üzere, API'den gelen data'yı liste olarak tutmaktadır.
 
 Sorting işlemleri için strategy pattern kullanıldı. Böylelikle kod tekrarı yapılmamış oldu. 
 Exporter objeleri instantiate edilirken constructor içinde hangi sorting işleminin yapılacağı belirtilmektedir. Export işlemi, sorting işlemi belirlenmeden çalıştırılamamaktadır. Yani, şayet export işlemi yapılacak ise, hangi sort işleminin yapılacağı da aynı satırda belirlenmelidir. Bkz:
+XmlExporter xmlExporter = new XmlExporter(new DefaultSortingStrategy());
 CsvExporter csvExporter = new CsvExporter(new SortByNameStrategy());
-XmlExporter xmlExporter = new XmlExporter(new SortByNameStrategy());
+
+Testing işlemlerinin de projenin diğer kısımları gibi self-explanatory şekilde yazılmasına gayret edilmiştir.
 
 Saygılar...
-
-
-
-
-
-
-
-
-
-
-
-
